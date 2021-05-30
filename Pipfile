@@ -8,6 +8,7 @@ fastapi = {extras = ["all"], version = "*"}
 "discord.js" = "*"
 "discord.py" = "*"
 alpaca-trade-api = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
