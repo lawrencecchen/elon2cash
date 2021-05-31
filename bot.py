@@ -1,3 +1,4 @@
+#Elon2Cash Trading Discord Bot
 from logging import error
 import alpaca_trade_api as trade_api
 from dotenv import load_dotenv
@@ -7,7 +8,7 @@ from db import init_db, buy, sell, get_portfolio,get_current_holdings
 
 load_dotenv()
 init_db()
-# made  a change4
+
 ALPACA_API_KEY = os.environ.get('ALPACA_API_KEY')
 ALPACA_API_SECRET = os.environ.get('ALPACA_API_SECRET')
 APCA_API_BASE_URL = os.environ.get('APCA_API_BASE_URL')
