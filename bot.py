@@ -1,4 +1,4 @@
-#Elon2Cash Trading Discord Bot 
+#Elon2Cash Trading Discord Bot lmao hi
 from logging import error
 import alpaca_trade_api as trade_api
 from dotenv import load_dotenv
