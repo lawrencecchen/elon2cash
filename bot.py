@@ -1,4 +1,4 @@
-#Elon2Cash Trading Discord Bot
+#Elon2Cash Trading Discord Bot 
 from logging import error
 import alpaca_trade_api as trade_api
 from dotenv import load_dotenv
@@ -6,6 +6,8 @@ import os
 from discord.ext import commands
 from db import init_db, buy, sell, get_portfolio,get_current_holdings
 
+
+#initialize database
 load_dotenv()
 init_db()
 
