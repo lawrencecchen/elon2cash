@@ -109,27 +109,24 @@ async def buy(ctx, symbol: to_upper, price: float):
 async def sell(ctx, symbol: to_upper, price: float):
     try:
         shares = float(price) / current_price(symbol)
-        current = db.get_current_holdings(ctx.author, symbol.upper())
+        current = db.get_current_holdings(ctx.author, symbol)
         if current["qty"] - shares < 0:
             return await ctx.channel.send("Not enough shares to sell.")
-        db.sell(ctx.author, symbol.upper(), shares, price)
+        db.sell(ctx.author, symbol, shares, price)
         await ctx.channel.send(
-            "{} sold ${:,.2f} of {}.".format(
-                str(ctx.author), float(price), symbol.upper()
-            )
+            "{} sold ${:,.2f} of {}.".format(str(ctx.author), float(price), symbol)
         )
-    except:
+    except Exception as e:
+        print(e)
         await ctx.channel.send("Could not sell for {}.".format(str(ctx.author)))
 
 
 @bot.command()
 async def my(ctx, symbol: to_upper):
     try:
-        current = db.get_current_holdings(ctx.author, symbol.upper())
+        current = db.get_current_holdings(ctx.author, symbol)
         await ctx.channel.send(
-            """{}'s owns {} shares of {}""".format(
-                ctx.author, current["qty"], symbol.upper()
-            )
+            """{}'s owns {} shares of {}""".format(ctx.author, current["qty"], symbol)
         )
     except Exception as e:
         print(e)
@@ -144,8 +141,11 @@ async def my(ctx, symbol: to_upper):
 async def balance(ctx):
     try:
         balance = db.get_balance(ctx.author)
+        print(balance)
         await ctx.channel.send(
-            "{}'s balance is: ${:,.2f}".format(str(ctx.author), float(balance))
+            "{}'s balance is: ${:,.2f}".format(
+                str(ctx.author), float(balance["balance"])
+            )
         )
     except Exception as e:
         print(e)

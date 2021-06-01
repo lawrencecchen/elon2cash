@@ -55,30 +55,27 @@ def init_tables():
         END;
         """
     )
+    c.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS update_balance_after_buy
+            AFTER INSERT on stocks
+            WHEN NEW.trans = 'BUY'
+        BEGIN
+            UPDATE balances SET balance = balance - NEW.price WHERE owner = NEW.owner;
+        END;
+        """
+    )
+    c.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS update_balance_after_sell
+            AFTER INSERT on stocks
+            WHEN NEW.trans = 'SELL'
+        BEGIN
+            UPDATE balances SET balance = balance + NEW.price WHERE owner = NEW.owner;
+        END;
+        """
+    )
 
-    # c.execute("""
-    #   create trigger if not exists qty_cannot_be_negative_check
-    #         after insert on stocks
-    #     begin
-    #         select
-    #             case
-    #                 when (
-    #                     select
-    #                         sum(
-    #                             case
-    #                                 when trans = "BUY" then qty
-    #                                 when trans = "SELL" then -qty
-    #                             end
-    #                         )
-    #                         from stocks
-    #                         where
-    #                             owner = NEW.owner
-    #                             and symbol = NEW.symbol
-    #                 ) + NEW.qty < 0 THEN
-    #                     RAISE (ABORT, "You suck!")
-    #                 END;
-    #             END;
-    # """)
     con.commit()
 
 
@@ -97,12 +94,12 @@ def get_balance(owner):
 
 def buy(owner: str, symbol: str, qty: float, price: float):
     c = con.cursor()
-    c.execute(
-        """
-        UPDATE balances SET balance = balance - ? WHERE owner = ?
-        """,
-        [float(price), str(owner)],
-    )
+    # c.execute(
+    #     """
+    #     UPDATE balances SET balance = balance - ? WHERE owner = ?
+    #     """,
+    #     [float(price), str(owner)],
+    # )
     c.execute(
         """
         INSERT INTO stocks
