@@ -94,12 +94,6 @@ def get_balance(owner):
 
 def buy(owner: str, symbol: str, qty: float, price: float):
     c = con.cursor()
-    # c.execute(
-    #     """
-    #     UPDATE balances SET balance = balance - ? WHERE owner = ?
-    #     """,
-    #     [float(price), str(owner)],
-    # )
     c.execute(
         """
         INSERT INTO stocks
