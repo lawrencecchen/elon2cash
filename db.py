@@ -1,8 +1,11 @@
+# from bot import to_upper
 import sqlite3
 from sqlite3 import Error
 
+
 def create_connection(db_file):
-    """ create a database connection to the SQLite database
+    """
+    create a database connection to the SQLite database
         specified by db_file
     :param db_file: database file
     :return: Connection object or None
@@ -16,11 +19,14 @@ def create_connection(db_file):
 
     return conn
 
-con = create_connection('./database.db')
 
-def init_db():
+con = create_connection("./database.db")
+
+
+def init_tables():
     c = con.cursor()
-    c.execute("""
+    c.execute(
+        """
         CREATE TABLE IF NOT EXISTS stocks (
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             owner text,
@@ -29,7 +35,26 @@ def init_db():
             qty real,
             price real
         );
-    """)
+        """
+    )
+
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS balances (
+            owner text PRIMARY KEY,
+            balance real DEFAULT 10000
+        )
+        """
+    )
+    c.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS create_balance_new_user
+            BEFORE INSERT on stocks
+        BEGIN
+            INSERT OR IGNORE INTO balances (owner) VALUES (NEW.owner);
+        END;
+        """
+    )
 
     # c.execute("""
     #   create trigger if not exists qty_cannot_be_negative_check
@@ -56,23 +81,45 @@ def init_db():
     # """)
     con.commit()
 
-def buy(owner,symbol,qty,price):
-    c = con.cursor()
-    data = [str(owner),str(symbol),float(qty),float(price)]
 
-    query = """
+def get_balance(owner):
+    c = con.cursor()
+    c.row_factory = sqlite3.Row
+    row = c.execute(
+        """
+        SELECT * FROM balances WHERE owner = ?
+    """,
+        [str(owner)],
+    ).fetchone()
+    con.commit()
+    return dict(row)
+
+
+def buy(owner: str, symbol: str, qty: float, price: float):
+    c = con.cursor()
+    c.execute(
+        """
+        UPDATE balances SET balance = balance - ? WHERE owner = ?
+        """,
+        [float(price), str(owner)],
+    )
+    c.execute(
+        """
         INSERT INTO stocks
             (owner, trans, symbol, qty, price)
         VALUES
             (?, 'BUY', ?, ?, ?)
-        """
-    c.execute(query, data)
+        """,
+        [str(owner), str(symbol), float(qty), float(price)],
+    )
     con.commit()
+
 
 def get_current_holdings(owner, symbol):
     c = con.cursor()
     c.row_factory = sqlite3.Row
-    row = c.execute("""
+    row = c.execute(
+        """
         SELECT
             sum(
                 case
@@ -84,26 +131,34 @@ def get_current_holdings(owner, symbol):
         where
             owner = ?
             and symbol = ?
-    """, [str(owner), str(symbol)]).fetchone()
+    """,
+        [str(owner), str(symbol)],
+    ).fetchone()
     con.commit()
 
     return dict(row)
 
-def sell(owner,symbol,qty,price):
+
+def sell(owner, symbol, qty, price):
     c = con.cursor()
     c.row_factory = sqlite3.Row
-    c.execute("""
+    c.execute(
+        """
         INSERT INTO stocks
             (owner, trans, symbol, qty, price)
         VALUES
             (?, 'SELL', ?, ?, ?)
-        """, [str(owner),str(symbol),float(qty),float(price)])
+        """,
+        [str(owner), str(symbol), float(qty), float(price)],
+    )
     con.commit()
+
 
 def get_portfolio(owner):
     c = con.cursor()
     c.row_factory = sqlite3.Row
-    rows = c.execute("""
+    rows = c.execute(
+        """
         SELECT
             symbol, sum(
                 case
@@ -115,7 +170,9 @@ def get_portfolio(owner):
         where
             owner = ?
         group by symbol;
-    """, [str(owner)]).fetchall()
+    """,
+        [str(owner)],
+    ).fetchall()
     con.commit()
 
     return [dict(ix) for ix in rows]
