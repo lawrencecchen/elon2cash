@@ -173,4 +173,3 @@ def get_portfolio(owner):
     con.commit()
 
     return [dict(ix) for ix in rows]
-    # return json.dumps([dict(ix) for ix in rows])

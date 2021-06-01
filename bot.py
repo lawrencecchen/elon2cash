@@ -132,10 +132,6 @@ async def my(ctx, symbol: to_upper):
         print(e)
         await ctx.channel.send("You don't own this stock, {}.".format(str(ctx.author)))
 
-        # if nothing inside balance (None) => balance = 10000
-        # subtract balance -> transfer value to db.py, sql update balance
-        # sql initialize here, do operations buy/sell ...
-
 
 @bot.command()
 async def balance(ctx):
