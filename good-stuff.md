@@ -15,3 +15,7 @@ https://github.com/Rapptz/discord.py/blob/master/examples/basic_bot.py
 # ALPACA
 
 https://alpaca.markets/docs/api-documentation/how-to/market-data/
+
+# Python
+
+https://dev.to/codemouse92/dead-simple-python-project-structure-and-imports-38c6
