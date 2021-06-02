@@ -148,7 +148,7 @@ def sell(owner, symbol, qty, price):
 def get_portfolio(owner):
     c = con.cursor()
     c.row_factory = sqlite3.Row
-    rows = c.execute(
+    stocks = c.execute(
         """
         SELECT
             symbol, sum(
@@ -164,6 +164,14 @@ def get_portfolio(owner):
     """,
         [str(owner)],
     ).fetchall()
+
+    balance = c.execute(
+        """
+        SELECT balance from balances
+            WHERE owner = ?;
+        """,
+        [str(owner)],
+    ).fetchone()
     con.commit()
 
-    return [dict(ix) for ix in rows]
+    return {"stocks": [dict(ix) for ix in stocks], **dict(balance)}

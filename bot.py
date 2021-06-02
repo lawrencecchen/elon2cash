@@ -1,8 +1,13 @@
 import alpaca_trade_api as trade_api
 from dotenv import load_dotenv
 import os
+import discord
 from discord.ext import commands
 import db
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import matplotlib.ticker as ticker
 
 # initialize database
 load_dotenv()
@@ -51,15 +56,40 @@ async def price(ctx, symbol: to_upper):
 @bot.command()
 async def avg(ctx, symbol: to_upper):
     try:
-        barset = api.get_barset(symbol, "day", limit=5)
+        barset = api.get_barset(symbol, "day", limit=10)
         bars = barset[symbol]
         week_open = bars[0].o
         week_close = bars[-1].c
+
+        # def _make_x_bars(bar, i):
+        #     if bar.
+
+        y_bars = list(map(lambda bar: bar.c, bars))
+        # x_bars = [
+        #     datetime.fromisoformat(str(bar.t)).strftime("%m/%d") if i % 5 == 0 else "l"
+        #     for i, bar in enumerate(bars)
+        # ]
+        x_bars = list(
+            map(
+                lambda bar: str(datetime.fromisoformat(str(bar.t)).strftime("%m/%d")),
+                bars,
+            )
+        )
+
+        plt.title("{}'s Trading Prices".format(symbol))
+
+        plt.plot(x_bars, y_bars)
+        # ax = f.add_subplot(120)
+
+        graph = plt.savefig("average.png")
         percent_change = (week_close - week_open) / week_open * 100
         await ctx.send(
-            "{} moved {}% over the last 5 days".format(symbol, percent_change)
+            "{} moved {}% in the last 50 days.".format(symbol, percent_change),
+            file=discord.File("average.png"),
         )
-    except:
+        # await ctx.send(file=discord.File("average.png"))
+    except Exception as e:
+        print(e)
         await ctx.send("{} is not a valid stock.".format(symbol))
 
 
@@ -81,8 +111,13 @@ async def p(ctx):
             return await ctx.channel.send(
                 "Your portfolio is empty, {}".format(str(ctx.author))
             )
-        result = "".join(map(_format_stock, portfolio))
-        await ctx.channel.send("""{}'s Portfolio: \n{}""".format(ctx.author, result))
+        filtered = filter(lambda stock: stock["shares"] != 0, portfolio["stocks"])
+        result = "".join(map(_format_stock, filtered))
+        await ctx.channel.send(
+            """**{}'s Portfolio:** \n{}Remaining balance: ${:,.2f}""".format(
+                ctx.author, result, portfolio["balance"]
+            )
+        )
     except Exception as e:
         print(e)
         await ctx.channel.send(

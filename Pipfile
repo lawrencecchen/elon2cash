@@ -9,6 +9,8 @@ fastapi = {extras = ["all"], version = "*"}
 "discord.py" = "*"
 alpaca-trade-api = "*"
 python-dotenv = "*"
+matplotlib = "*"
+pandas = "*"
 
 [dev-packages]
 black = "*"
